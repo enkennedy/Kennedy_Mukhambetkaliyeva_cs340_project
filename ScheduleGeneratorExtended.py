@@ -30,13 +30,12 @@ class ProfessorInfo:
     self.times = []
 
 class ScheduledClass:
-  def __init__(self, id, time, room, capacity, prof, days):
+  def __init__(self, id, time, room, capacity, prof):
     self.id = id
     self.time = time
     self.room = room
     self.capacity = capacity
     self.prof = prof
-    self.days = days
     self.numEnrolled = 0
     self.students = []
 
@@ -101,7 +100,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
     optPrefVal += len(l) - 1
   fileP.close()
 
-  times.sort(key = lambda x: x.start) #times sorted by start time
+  times.sort(key = lambda x: x.start)
   for i in range(0,t):
     for j in range(0,t):
       if (times[j].end >= times[i].start and times[j].end <= times[i].end) or (times[j].start <= times[i].end and times[j].start >= times[i].start) or (times[j].start <= times[i].start and times[j].end >= times[i].end) or (times[j].start >= times[i].start and times[j].end <= times[i].end):
@@ -114,9 +113,9 @@ def createSchedule(constraints, studentprefs, finalschedule):
   times.sort(key = lambda x: len(x.overlap))
 
   schedule = [None] * c
-  #currT = 0
-  #length = c
-  #for i in range(0,c):
+  # currT = 0
+  # length = c
+  # for i in range(0,c):
   #  slot = times[currT]
   #  room = None
   #  for rm in roomsSorted:
@@ -150,7 +149,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
       for i in range(0, t):
         slot = times[i-1]
         if not roomBusy[room.id][i-1] and slot not in professor.times and slot not in room.times and len(slot.days) == cls.days and (slot.end - slot.start) == cls.time:
-          scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof, slot.days)
+          scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof)
           schedule[cls.id-1] = scheduledCls
           roomBusy[room.id][i-1] = True
           if slot not in professor.times:
@@ -180,8 +179,11 @@ def createSchedule(constraints, studentprefs, finalschedule):
         if cls is not None and cls.numEnrolled < cls.capacity and cls.time not in studentBusy[i]:
             cls.students.append(i+1)
             cls.numEnrolled += 1
-            studentBusy[i].append(cls.time)
-            studentBusy[i].extend(cls.time.overlap)
+            if cls.time not in studentBusy[i]:
+              studentBusy[i].append(cls.time)
+            for o in cls.time.overlap:
+              if o not in studentBusy[i]:
+                studentBusy[i].append(o)
             prefVal += 1
 
   #Output preference value and fit
@@ -191,15 +193,15 @@ def createSchedule(constraints, studentprefs, finalschedule):
 
   #Write to output
   fileS = open(finalschedule, "w")
-  fileS.write("Course\tRoom\tTeacher\tTime\tDays\tStudents\n")
+  fileS.write("Course\tRoom\tTeacher\tStart Time\tEnd Time\tDays\tStudents\n")
   for cls in schedule:
     if cls is None:
       continue
-    startHour = cls.time.start // 60
-    startMin = cls.time.start % 60
-    endHour = cls.time.end // 60
-    endMin = cls.time.end % 60
-    fileS.write(str(cls.id) + "\t" + str(cls.room) + "\t" + str(cls.prof) + "\t" + str(cls.time.start) + "-" + str(cls.time.end) + "\t" + str(cls.days) + "\t")
+    # startHour = cls.time.start // 60
+    # startMin = cls.time.start % 60
+    # endHour = cls.time.end // 60
+    # endMin = cls.time.end % 60
+    fileS.write(str(cls.id) + "\t" + str(cls.room) + "\t" + str(cls.prof) + "\t" + str(cls.time.start) + "\t" + str(cls.time.end) + "\t" + str(cls.time.days) + "\t")
     #fileS.write(str(cls.id) + "\t" + str(cls.room) + "\t" + str(cls.prof) + "\t" + str(startHour) + ":" + str(startMin) + "-" + str(endHour) + ":" + str(endMin) + "\t" + str(cls.days) + "\t")
     for student in cls.students:
       fileS.write(str(student) + " ")
