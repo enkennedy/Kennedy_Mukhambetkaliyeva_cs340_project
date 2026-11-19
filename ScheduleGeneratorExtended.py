@@ -109,7 +109,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
 
   roomsSorted = sorted(rooms, key = lambda x: x.capacity, reverse = True)
   classPopularity.sort(key = lambda x: x.level)
-  classPopularity.sort(key = lambda x: x.dept)
+  #classPopularity.sort(key = lambda x: x.dept)
   times.sort(key = lambda x: len(x.overlap))
 
   schedule = [None] * c
