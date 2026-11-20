@@ -2,10 +2,11 @@ import sys
 import time
 
 class RoomInfo:
-  def __init__(self, id, capacity):
+  def __init__(self, id, capacity, school):
     self.id = id
     self.capacity = capacity
     self.times = []
+    self.school = school
 
 class TimeInfo:
   def __init__(self, start, end, days):
@@ -15,13 +16,14 @@ class TimeInfo:
     self.overlap = []
 
 class ClassInfo:
-  def __init__(self, id, dept, level, prof, days, time):
+  def __init__(self, id, dept, level, prof, days, time, school):
     self.id = id
     self.dept = dept
     self.level = level
     self.prof = prof
     self.days = days
     self.time = time
+    self.school = school
 
 class ProfessorInfo:
   def __init__(self, id):
@@ -69,7 +71,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
       for i in range(0,r):
         line = fileC.readline()
         rinfo = line.split()
-        room = RoomInfo(int(rinfo[0]), int(rinfo[1]))
+        room = RoomInfo(int(rinfo[0]), int(rinfo[1]), int(rinfo[2]))
         rooms.append(room)
     if l[0] == "Classes":
       c = int(l[1])
@@ -81,7 +83,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
       for j in range(0,c):
         line = fileC.readline()
         cinfo = line.split()
-        cls = ClassInfo(int(cinfo[0]), int(cinfo[1]), int(cinfo[2]), int(cinfo[3]), int(cinfo[4]), int(cinfo[5]))
+        cls = ClassInfo(int(cinfo[0]), int(cinfo[1]), int(cinfo[2]), int(cinfo[3]), int(cinfo[4]), int(cinfo[5]), int(cinfo[6]))
         classPopularity.append(cls)
         professors[int(cinfo[1])-1].classes.append(int(cinfo[0]))
     line = fileC.readline()
@@ -148,7 +150,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
     for room in roomsSorted:
       for i in range(0, t):
         slot = times[i-1]
-        if not roomBusy[room.id][i-1] and slot not in professor.times and slot not in room.times and len(slot.days) == cls.days and (slot.end - slot.start) == cls.time:
+        if not roomBusy[room.id][i-1] and room.school == cls.school and slot not in professor.times and slot not in room.times and len(slot.days) == cls.days and (slot.end - slot.start) == cls.time:
           scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof)
           schedule[cls.id-1] = scheduledCls
           roomBusy[room.id][i-1] = True
@@ -188,8 +190,8 @@ def createSchedule(constraints, studentprefs, finalschedule):
 
   #Output preference value and fit
   print(f"Student Preference Value: {prefVal}")
-  print(f"Best Case Student Preference Value: {s * 4}")
-  print(f"Fit Ratio: {prefVal / (s * 4)}")
+  print(f"Best Case Student Preference Value: {optPrefVal}")
+  print(f"Fit Ratio: {prefVal / (optPrefVal)}")
 
   #Write to output
   fileS = open(finalschedule, "w")
@@ -197,12 +199,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
   for cls in schedule:
     if cls is None:
       continue
-    # startHour = cls.time.start // 60
-    # startMin = cls.time.start % 60
-    # endHour = cls.time.end // 60
-    # endMin = cls.time.end % 60
     fileS.write(str(cls.id) + "\t" + str(cls.room) + "\t" + str(cls.prof) + "\t" + str(cls.time.start) + "\t" + str(cls.time.end) + "\t" + str(cls.time.days) + "\t")
-    #fileS.write(str(cls.id) + "\t" + str(cls.room) + "\t" + str(cls.prof) + "\t" + str(startHour) + ":" + str(startMin) + "-" + str(endHour) + ":" + str(endMin) + "\t" + str(cls.days) + "\t")
     for student in cls.students:
       fileS.write(str(student) + " ")
     fileS.write("\n")
