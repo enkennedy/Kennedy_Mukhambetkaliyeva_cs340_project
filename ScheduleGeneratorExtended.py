@@ -116,35 +116,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
   #times.sort(key = lambda x: len(x.overlap))
 
   schedule = [None] * c
-  # currT = 0
-  # length = c
-  # for i in range(0,c):
-  #  slot = times[currT]
-  #  room = None
-  #  for rm in roomsSorted:
-  #    if slot not in rm.times:
-  #      room = rm
-  #      break
-  #  cls = classPopularity[-1]
-  #  professor = professors[cls.prof-1]
-  #  idx = -1
-  #  while slot in professor.times and idx > -length:
-  #    idx -= 1
-  #    temp = classPopularity[idx]
-  #    professor = professors[temp.prof-1]
-  #  if slot not in professor.times and room != None:
-  #      cls = classPopularity.pop(idx)
-  #      length -= 1
-  #      scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof)
-  #      schedule[cls.id-1] = scheduledCls
-  #      professor.times.append(slot)
-  #      professor.times.extend(slot.overlap)
-  #      room.times.append(slot)
-  #      room.times.extend(slot.overlap)
-  #  currT += 1
-  #  if currT >= t:
-  #    currT = 0
-
+ 
   roomBusy = {room.id: [False] * t for room in rooms}
   for cls in classPopularity:
     professor = professors[cls.prof-1]
