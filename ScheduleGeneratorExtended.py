@@ -113,7 +113,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
   roomsSorted = sorted(rooms, key = lambda x: x.capacity, reverse = True)
   classPopularity.sort(key = lambda x: x.level)
   #classPopularity.sort(key = lambda x: x.dept)
-  times.sort(key = lambda x: len(x.overlap))
+  #times.sort(key = lambda x: len(x.overlap))
 
   schedule = [None] * c
   # currT = 0
@@ -151,7 +151,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
     for room in roomsSorted:
       for i in range(0, t):
         slot = times[i-1]
-        if not roomBusy[room.id][i-1] and room.school == cls.school and slot not in professor.times and slot not in room.times and len(slot.days) == cls.days and (slot.end - slot.start) == cls.time:
+        if not roomBusy[room.id][i-1] and room.school == cls.school and slot not in professor.times and slot not in room.times and len(slot.days) >= cls.days and (slot.end - slot.start) >= cls.time:
           scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof, cls.school)
           schedule[cls.id-1] = scheduledCls
           roomBusy[room.id][i-1] = True
@@ -184,7 +184,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
         if cls == None or cls.numEnrolled >= cls.capacity or cls.time in studentBusy[i]:
             enroll = False
         for e in studentEnrolled[i]:
-            if cls.school != e.school and (cls.time.days in e.time.days or e.time.days in cls.time.days) and (cls.time.start - e.time.end < 30 or e.time.start - cls.time.end < 30):
+            if cls != None and cls.school != e.school and (cls.time.days in e.time.days or e.time.days in cls.time.days) and (cls.time.start - e.time.end < 30 or e.time.start - cls.time.end < 30):
                 enroll = False
                 break
         if enroll:
