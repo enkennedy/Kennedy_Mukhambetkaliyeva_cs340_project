@@ -32,7 +32,7 @@ class ProfessorInfo:
     self.times = []
 
 class ScheduledClass:
-  def __init__(self, id, time, room, capacity, prof):
+  def __init__(self, id, time, room, capacity, prof, school):
     self.id = id
     self.time = time
     self.room = room
@@ -40,6 +40,7 @@ class ScheduledClass:
     self.prof = prof
     self.numEnrolled = 0
     self.students = []
+    self.school = school
 
 def createSchedule(constraints, studentprefs, finalschedule):
   start = time.perf_counter()
@@ -151,7 +152,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
       for i in range(0, t):
         slot = times[i-1]
         if not roomBusy[room.id][i-1] and room.school == cls.school and slot not in professor.times and slot not in room.times and len(slot.days) == cls.days and (slot.end - slot.start) == cls.time:
-          scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof)
+          scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof, cls.school)
           schedule[cls.id-1] = scheduledCls
           roomBusy[room.id][i-1] = True
           if slot not in professor.times:
@@ -175,18 +176,27 @@ def createSchedule(constraints, studentprefs, finalschedule):
   #Enroll students
   prefVal = 0
   studentBusy = [[] for _ in range(s)]
+  studentEnrolled = [[] for _ in range(s)]
   for i in range(0,s):
     for j in studentPreferences[i]:
         cls = schedule[int(j)-1]
-        if cls is not None and cls.numEnrolled < cls.capacity and cls.time not in studentBusy[i]:
-            cls.students.append(i+1)
-            cls.numEnrolled += 1
-            if cls.time not in studentBusy[i]:
-              studentBusy[i].append(cls.time)
-            for o in cls.time.overlap:
-              if o not in studentBusy[i]:
-                studentBusy[i].append(o)
-            prefVal += 1
+        enroll = True
+        if cls == None or cls.numEnrolled >= cls.capacity or cls.time in studentBusy[i]:
+            enroll = False
+        for e in studentEnrolled[i]:
+            if cls.school != e.school and (cls.time.days in e.time.days or e.time.days in cls.time.days) and (cls.time.start - e.time.end < 30 or e.time.start - cls.time.end < 30):
+                enroll = False
+                break
+        if enroll:
+          studentEnrolled[i].append(cls)
+          cls.students.append(i+1)
+          cls.numEnrolled += 1
+          if cls.time not in studentBusy[i]:
+            studentBusy[i].append(cls.time)
+          for o in cls.time.overlap:
+            if o not in studentBusy[i]:
+              studentBusy[i].append(o)
+          prefVal += 1
 
   #Output preference value and fit
   print(f"Student Preference Value: {prefVal}")
