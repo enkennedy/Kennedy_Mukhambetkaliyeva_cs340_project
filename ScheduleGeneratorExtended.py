@@ -2,11 +2,12 @@ import sys
 import time
 
 class RoomInfo:
-  def __init__(self, id, capacity, school):
+  def __init__(self, id, capacity, school, building):
     self.id = id
     self.capacity = capacity
     self.times = []
     self.school = school
+    self.building = building
 
 class TimeInfo:
   def __init__(self, start, end, days):
@@ -16,7 +17,7 @@ class TimeInfo:
     self.overlap = []
 
 class ClassInfo:
-  def __init__(self, id, dept, level, prof, days, time, school):
+  def __init__(self, id, dept, level, prof, days, time, school, building):
     self.id = id
     self.dept = dept
     self.level = level
@@ -24,6 +25,7 @@ class ClassInfo:
     self.days = days
     self.time = time
     self.school = school
+    self.building = building
 
 class ProfessorInfo:
   def __init__(self, id):
@@ -72,7 +74,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
       for i in range(0,r):
         line = fileC.readline()
         rinfo = line.split()
-        room = RoomInfo(int(rinfo[0]), int(rinfo[1]), int(rinfo[2]))
+        room = RoomInfo(int(rinfo[0]), int(rinfo[1]), int(rinfo[2]), int(rinfo[3]))
         rooms.append(room)
     if l[0] == "Classes":
       c = int(l[1])
@@ -84,7 +86,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
       for j in range(0,c):
         line = fileC.readline()
         cinfo = line.split()
-        cls = ClassInfo(int(cinfo[0]), int(cinfo[1]), int(cinfo[2]), int(cinfo[3]), int(cinfo[4]), int(cinfo[5]), int(cinfo[6]))
+        cls = ClassInfo(int(cinfo[0]), int(cinfo[1]), int(cinfo[2]), int(cinfo[3]), int(cinfo[4]), int(cinfo[5]), int(cinfo[6]), int(cinfo[7]))
         classPopularity.append(cls)
         professors[int(cinfo[1])-1].classes.append(int(cinfo[0]))
     line = fileC.readline()
@@ -111,8 +113,8 @@ def createSchedule(constraints, studentprefs, finalschedule):
           times[i].overlap.append(times[j])
 
   roomsSorted = sorted(rooms, key = lambda x: x.capacity, reverse = True)
+  classPopularity.sort(key = lambda x: x.dept)
   classPopularity.sort(key = lambda x: x.level)
-  #classPopularity.sort(key = lambda x: x.dept)
   #times.sort(key = lambda x: len(x.overlap))
 
   schedule = [None] * c
@@ -123,7 +125,7 @@ def createSchedule(constraints, studentprefs, finalschedule):
     for room in roomsSorted:
       for i in range(0, t):
         slot = times[i-1]
-        if not roomBusy[room.id][i-1] and room.school == cls.school and slot not in professor.times and slot not in room.times and len(slot.days) >= cls.days and (slot.end - slot.start) >= cls.time:
+        if not roomBusy[room.id][i-1] and room.building == cls.building and room.school == cls.school and slot not in professor.times and slot not in room.times and len(slot.days) >= cls.days and (slot.end - slot.start) >= cls.time:
           scheduledCls = ScheduledClass(cls.id, slot, room.id, room.capacity, cls.prof, cls.school)
           schedule[cls.id-1] = scheduledCls
           roomBusy[room.id][i-1] = True

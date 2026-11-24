@@ -1,8 +1,9 @@
+import re
 import sys
 import pandas as pd
 
 class Course:
-    def __init__(self, id, prof, dept, level, days, time, school):
+    def __init__(self, id, prof, dept, level, days, time, school, building):
         self.id = id
         self.prof = prof
         self.dept = dept
@@ -10,6 +11,7 @@ class Course:
         self.days = days
         self.time = time
         self.school = school
+        self.building = building
 
 def getData(csv, constraints, prefs):
 
@@ -22,12 +24,19 @@ def getData(csv, constraints, prefs):
     times = []
     students = {}
     rooms = {}
+    buildings = {}
 
     currStudent = 1
     currCourse = 1
-    currDept = 1
+    currDept = 36
+    deptRankings = {"MATH":1, "BIOL":2, "PSYC":3, "ECON":4, "SOCL":5, "POLS":6, "CHEM":7, "ENGL":8,
+             "INST":9, "CMSC":10, "PHSY":11, "CITY":12, "ANTH":13, "HART":14, "HIST":15, "LING":16,
+             "ARTF":17, "ARTS":17, "FREN":18, "EDUC":19, "CSTS":20, "PHIL":21, "RUSS":22, "GEOL":23, "SPAN":24,
+             "ARCH":25, "COML":26, "EALC":27, "EAST":27, "ITAL":28, "MUSC":29, "RELG":30, "ASTR":31,
+             "ARTW":32, "ENVS":33, "GERM":34, "NEUR":35}
     currProf = 1
     currRoom = 1
+    currBuilding = 1
     
     for index, row in data.iterrows():
 
@@ -38,8 +47,12 @@ def getData(csv, constraints, prefs):
                 school = 2
 
         room = str(row["Facil ID 1"])
+        building = re.sub(r'\d+', '', room)
+        if building not in buildings:
+            buildings[building] = currBuilding
+            currBuilding += 1
         if room not in rooms:
-            rooms[room] = [currRoom, 0, school]
+            rooms[room] = [currRoom, 0, school, buildings[building]]
             currRoom += 1
         rooms[room][1] += 1
 
@@ -79,9 +92,11 @@ def getData(csv, constraints, prefs):
         course = int(row["Course ID"])
         if course not in courses:
             dept = str(row["Subject"])
-            if dept not in depts:
+            if dept not in deptRankings and dept not in depts:
                 depts[dept] = currDept
                 currDept += 1
+            elif dept in deptRankings and dept not in depts:
+                depts[dept] = deptRankings[dept]
             if "Catalog" in data.columns:
                 level = str(row["Catalog"])[1]
             else:
@@ -94,7 +109,7 @@ def getData(csv, constraints, prefs):
                 cTime = 0
             else:
                 cTime = len(days)
-            c = Course(currCourse, profs[prof], depts[dept], level, cTime, eTime-sTime, school)
+            c = Course(currCourse, profs[prof], depts[dept], level, cTime, eTime-sTime, school, rooms[room][3])
             courses[course] = c
             currCourse += 1
 
@@ -114,11 +129,11 @@ def getData(csv, constraints, prefs):
         fileC.write(str(slot[0]) + "\t" + str(slot[1]) + "\t" + slot[2] + "\n")
     fileC.write("Rooms\t" + str(len(rooms)) + "\n")
     for r in rooms.values():
-        fileC.write(str(r[0]) + "\t" + str(r[1]) + "\t" + str(r[2]) + "\n")
+        fileC.write(str(r[0]) + "\t" + str(r[1]) + "\t" + str(r[2]) + "\t" + str(r[3]) + "\n")
     fileC.write("Classes\t" + str(len(courses)) + "\n")
     fileC.write("Teachers\t" + str(len(profs)) + "\n")
     for c in courses.values():
-        fileC.write(str(c.id) + "\t" + str(c.dept) + "\t" + str(c.level) + "\t" + str(c.prof) + "\t" + str(c.days) + "\t" + str(c.time) + "\t" + str(c.school) + "\n")
+        fileC.write(str(c.id) + "\t" + str(c.dept) + "\t" + str(c.level) + "\t" + str(c.prof) + "\t" + str(c.days) + "\t" + str(c.time) + "\t" + str(c.school) + "\t" + str(c.building) + "\n")
     fileC.close()
 
     #Write data to prefs
