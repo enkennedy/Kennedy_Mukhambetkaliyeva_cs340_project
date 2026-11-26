@@ -1,4 +1,4 @@
-#Simplified Algorithm:
+# Simplified Algorithm:
 
 Final Simplified Algorithm - scheduleGenerator.py
 
@@ -10,7 +10,7 @@ Test case data in solution_quality, 25 tests total
 
 To run test cases: sh run_test.sh testNumber
 
-#Extended Algorithm:
+# Extended Algorithm:
 
 Extended Algorithm - ScheduleGeneratorExtended.py
 
@@ -25,7 +25,7 @@ To run Bryn Mawr tests: sh run_extended.sh SemesterYear
 To run Hav/BMC test: python3 ScheduleGeneratorExtended.py hav_data/
 constraints_HS2014.txt hav_data/prefs_HS2014.txt hav_data/schedule_HS2014.txt
 
-#Additional Files/Scripts:
+# Additional Files/Scripts:
 
 Time analysis test data in time_analysis
 
